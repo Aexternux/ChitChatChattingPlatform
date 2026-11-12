@@ -9,6 +9,8 @@
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#007aff" />
   <link rel="apple-touch-icon" href="/favicon.png" />
+  <link rel="stylesheet" href="theme.css" />
+  <script src="theme.js"></script>
 </head>
 <body>
   <div class="container">
@@ -82,6 +84,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="profile-utils.js"></script>
   <script src="push.js"></script>
 
   <script>
@@ -94,26 +97,64 @@
     const imageInput = document.getElementById("image-input");
 
     const username = localStorage.getItem("username");
-    const chatWith = localStorage.getItem("chatWith");
+    const isGroup = localStorage.getItem("chatIsGroup") === "1";
+    const groupId = localStorage.getItem("chatId");          // present for group chats
+    const chatWith = localStorage.getItem("chatWith");        // present for 1:1 chats
+    const chatName = localStorage.getItem("chatName") || chatWith;
 
-    if (!username || !chatWith) {
-      alert("Missing user or chat partner.");
+    if (!username || (!chatWith && !groupId)) {
+      alert("Missing chat.");
       window.location.href = "dashboard.html";
     }
 
     document.getElementById("user-display").textContent = username;
     document.getElementById("username-display").textContent = username;
-    document.getElementById("chat-with").textContent = chatWith;
 
-    const chatId = [username, chatWith].sort().join('_');
+    const chatId = isGroup ? groupId : [username, chatWith].sort().join('_');
     const messagesRef = db.collection("chats").doc(chatId).collection("messages");
     const FieldValue = firebase.firestore.FieldValue;
 
-    // Record participants so the push Cloud Function can find the recipient.
-    db.collection("chats").doc(chatId).set(
-      { participants: [username, chatWith] },
-      { merge: true }
-    ).catch(() => {});
+    // Build the chat header (group vs 1:1).
+    (function () {
+      const info = document.querySelector(".chat-header-info");
+      const cw = document.getElementById("chat-with");
+      const youAre = document.querySelector(".you-are");
+      info.style.display = "flex";
+      info.style.alignItems = "center";
+      info.style.gap = "10px";
+
+      if (isGroup) {
+        cw.textContent = chatName;
+        const ga = document.createElement("div");
+        ga.className = "cc-avatar";
+        ga.style.cssText = "width:36px;height:36px;border-radius:50%;background:var(--accent,#5865f2);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 auto;";
+        ga.textContent = "👥";
+        info.insertBefore(ga, cw);
+        // Voice/video calls aren't supported in group chats.
+        const ca = document.querySelector(".call-actions"); if (ca) ca.style.display = "none";
+        // Show member names under the header.
+        db.collection("chats").doc(chatId).get().then(d => {
+          if (d.exists && youAre) {
+            const ps = (d.data().participants || []);
+            youAre.innerHTML = "👥 " + ps.length + " members · " + ps.map(p => p === username ? "You" : p).join(", ");
+          }
+        }).catch(() => {});
+      } else {
+        cw.textContent = chatWith;
+        info.style.cursor = "pointer";
+        info.title = "View " + chatWith + "'s profile";
+        if (window.makeAvatar) info.insertBefore(makeAvatar(chatWith, chatWith, 36), cw);
+        info.addEventListener("click", () => { window.location.href = "profile.html?user=" + encodeURIComponent(chatWith); });
+      }
+    })();
+
+    // Only 1:1 chats record participants here; groups are created explicitly.
+    if (!isGroup) {
+      db.collection("chats").doc(chatId).set(
+        { participants: [username, chatWith] },
+        { merge: true }
+      ).catch(() => {});
+    }
 
     // Cache of message data by id, used by reply/react handlers.
     const messagesById = {};
@@ -308,6 +349,20 @@
       const avatar = document.createElement("div");
       avatar.className = "avatar";
       avatar.textContent = sender.charAt(0).toUpperCase();
+      avatar.style.cursor = "pointer";
+      avatar.title = "View " + sender + "'s profile";
+      avatar.addEventListener("click", () => goToProfile(sender));
+      // Lazy-load this sender's profile photo into the chat avatar.
+      if (window.getUserPhoto) {
+        getUserPhoto(sender).then(p => {
+          if (p) {
+            avatar.style.backgroundImage = `url("${p}")`;
+            avatar.style.backgroundSize = "cover";
+            avatar.style.backgroundPosition = "center";
+            avatar.textContent = "";
+          }
+        });
+      }
 
       const col = document.createElement("div");
       col.className = "msg-col";
@@ -868,5 +923,6 @@
       }
     });
   </script>
+  <script src="sidebar.js"></script>
 </body>
 </html>

@@ -4,10 +4,14 @@
   <title>Settings</title>
   <link rel="icon" href="/favicon.png" type="image/x-icon" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="theme.css" />
+  <script src="theme.js"></script>
 </head>
-<body>
+<body class="page-narrow">
   <div class="container">
     <h2>Settings</h2>
+    <button onclick="location.href='profile.html'">Edit My Profile</button>
+    <br /><br />
     <button onclick="deleteAccount()">Delete My Account</button>
     <br /><br />
     <a href="dashboard.html">← Back to Dashboard</a>
@@ -36,5 +40,7 @@
       });
     }
   </script>
+  <script src="profile-utils.js"></script>
+  <script src="sidebar.js"></script>
 </body>
 </html>

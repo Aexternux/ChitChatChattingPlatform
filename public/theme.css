@@ -1,0 +1,361 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* =========================================================================
+   ChitChat design system — modern, professional UI.
+   Light = clean (Instagram-like) · Dark = deep (Discord-like).
+   Loaded LAST on every page so it refines each page's own styles.
+   Dark mode: html[data-theme="dark"]  (+ legacy body.dark)
+   ========================================================================= */
+
+:root{
+  --bg1:#f3f6fb; --bg2:#e9eef6;
+  --surface:#ffffff; --surface-2:#f1f3f7; --inset:#eef1f6;
+  --text:#101423; --muted:#6b7280; --faint:#9aa3b2; --border:#e4e8ef;
+  --accent:#5865f2; --accent-strong:#4450d6; --on-accent:#ffffff;
+  --accent-soft:rgba(88,101,242,.12);
+  --danger:#ef4444; --success:#22c55e;
+  --bubble-self:#5865f2; --on-self:#ffffff;
+  --bubble-other:#eef1f6; --on-other:#101423;
+  --shadow:0 10px 30px rgba(24,39,75,.10);
+  --shadow-sm:0 2px 8px rgba(24,39,75,.08);
+  --shadow-lg:0 20px 50px rgba(24,39,75,.16);
+  --ring:0 0 0 4px var(--accent-soft);
+  --r-sm:10px; --r:14px; --r-lg:20px; --r-xl:26px;
+}
+html[data-theme="dark"]{
+  --bg1:#14161c; --bg2:#0f1116;
+  --surface:#1e2127; --surface-2:#2a2e37; --inset:#15171d;
+  --text:#e7e9ee; --muted:#9aa0ab; --faint:#6b717c; --border:#2c3038;
+  --accent:#5865f2; --accent-strong:#6b77f5; --on-accent:#ffffff;
+  --accent-soft:rgba(88,101,242,.22);
+  --bubble-self:#5865f2; --on-self:#ffffff;
+  --bubble-other:#2a2e37; --on-other:#e7e9ee;
+  --shadow:0 14px 36px rgba(0,0,0,.5);
+  --shadow-sm:0 3px 12px rgba(0,0,0,.4);
+  --shadow-lg:0 24px 60px rgba(0,0,0,.6);
+}
+
+/* ---------- typography ---------- */
+body{ font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; letter-spacing:-.01em; }
+h1,h2,h3,h4,h5,p,a,span,li,small,strong,label,button,input,textarea,select,div,ul{
+  font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+}
+h1,h2,h3{ letter-spacing:-.02em; font-weight:700; }
+
+/* ---------- page background ---------- */
+body:not(.home-page):not(.auth-page){
+  background:linear-gradient(170deg,var(--bg1),var(--bg2)) !important;
+  background-attachment:fixed;
+  color:var(--text);
+}
+/* auth pages keep the photo backdrop */
+body.auth-page{
+  background:url('background.png') no-repeat center center fixed !important;
+  background-size:cover !important;
+}
+a{ color:var(--accent); text-decoration:none; }
+a:hover{ text-decoration:underline; }
+
+/* ---------- cards / containers ---------- */
+.container, .card{
+  border-radius:var(--r-lg) !important;
+  box-shadow:var(--shadow) !important;
+}
+.container:hover{ transform:none !important; }            /* kill the old jump-on-hover */
+html[data-theme="dark"] .container,
+html[data-theme="dark"] .card{ background:var(--surface) !important; color:var(--text) !important; }
+html[data-theme="dark"] h2, html[data-theme="dark"] h3{ color:var(--text); }
+html[data-theme="dark"] h3{ border-bottom-color:var(--border) !important; }
+html[data-theme="dark"] p{ color:var(--muted); }
+
+/* section labels feel more "app-like" */
+h3{ font-size:.82rem !important; text-transform:uppercase; letter-spacing:.06em !important;
+    color:var(--muted) !important; font-weight:700 !important; border-bottom:0 !important;
+    margin:22px 2px 10px !important; padding:0 !important; }
+
+/* ---------- buttons ---------- */
+button{ font-weight:600; border-radius:999px; cursor:pointer; transition:transform .12s ease, background .2s ease, box-shadow .2s ease, filter .2s ease; }
+button:active{ transform:scale(.97); }
+
+/* generic primary (login/signup/settings/add-friends) */
+.container > button,
+button.inline-button,
+form button[type="submit"]{
+  background:var(--accent) !important; color:var(--on-accent) !important; border:none !important;
+  box-shadow:0 6px 18px var(--accent-soft) !important;
+}
+.container > button:hover{ background:var(--accent-strong) !important; transform:translateY(-1px); }
+
+/* dashboard top bar → clean, unified pills */
+.top-buttons{ gap:10px !important; }
+.top-buttons button{
+  background:var(--surface-2) !important; color:var(--text) !important;
+  box-shadow:var(--shadow-sm) !important; font-weight:600 !important;
+  border:1px solid var(--border) !important;
+}
+.top-buttons button i{ color:var(--accent); }
+.top-buttons button:hover{ background:var(--accent) !important; color:#fff !important; transform:translateY(-2px); }
+.top-buttons button:hover i{ color:#fff; }
+.top-buttons .logout:hover{ background:var(--danger) !important; }
+.top-buttons .logout:hover i{ color:#fff; }
+
+/* ---------- inputs ---------- */
+input[type="text"], input[type="password"], textarea, select,
+#searchBar, #search, #input, #postCaption, #statusInput, #bioInput{
+  border-radius:var(--r) !important;
+  border:1px solid var(--border) !important;
+  background:var(--surface) !important; color:var(--text) !important;
+  transition:border-color .2s, box-shadow .2s, background .2s;
+}
+#searchBar, #search, #input{ border-radius:999px !important; }
+input:focus, textarea:focus, select:focus,
+#searchBar:focus, #search:focus, #input:focus{
+  outline:none !important; border-color:var(--accent) !important; box-shadow:var(--ring) !important;
+}
+html[data-theme="dark"] input[type="text"],
+html[data-theme="dark"] input[type="password"],
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select,
+html[data-theme="dark"] #searchBar,
+html[data-theme="dark"] #search,
+html[data-theme="dark"] #input{ background:var(--inset) !important; }
+::placeholder{ color:var(--faint) !important; }
+
+/* ---------- avatars ---------- */
+.cc-avatar, .avatar, .bigava{ border:0; }
+.cc-avatar{ box-shadow:var(--shadow-sm); }
+
+/* ======================================================================
+   CHAT  (Discord / iMessage hybrid)
+   ====================================================================== */
+.top-bar{
+  position:sticky; top:0; z-index:20;
+  background:var(--surface) !important; border-bottom:1px solid var(--border) !important;
+  padding:12px 16px !important; backdrop-filter:saturate(1.2);
+}
+html[data-theme="dark"] .top-bar{ background:var(--surface) !important; }
+.chat-header-info{ color:var(--text) !important; font-weight:700 !important; }
+.back-button{ color:var(--accent) !important; }
+.call-actions button{
+  background:var(--surface-2) !important; color:var(--text) !important;
+  border:1px solid var(--border) !important;
+}
+.call-actions button:hover{ background:var(--accent) !important; color:#fff !important; }
+.you-are{ background:var(--surface) !important; color:var(--muted) !important; border-bottom:1px solid var(--border) !important; font-size:12px !important; }
+
+#messages{ background:var(--inset) !important; padding:16px !important; gap:4px !important; }
+.message{ box-shadow:none !important; font-size:14.5px !important; line-height:1.45 !important; padding:9px 13px !important; }
+.self .message, .message.self{ background:var(--bubble-self) !important; color:var(--on-self) !important; border-bottom-right-radius:5px !important; }
+.other .message, .message.other{ background:var(--bubble-other) !important; color:var(--on-other) !important; border-bottom-left-radius:5px !important; }
+.avatar{ background-color:var(--accent) !important; box-shadow:var(--shadow-sm); }
+
+form{ background:var(--surface) !important; border-top:1px solid var(--border) !important; padding:12px 14px !important; }
+#input{ background:var(--inset) !important; padding:11px 16px !important; }
+button[type="submit"]{ background:var(--accent) !important; box-shadow:0 6px 16px var(--accent-soft) !important; }
+button[type="submit"]:hover{ background:var(--accent-strong) !important; }
+
+#emoji-picker, .reaction-picker{ background:var(--surface) !important; border:1px solid var(--border) !important; box-shadow:var(--shadow) !important; border-radius:var(--r) !important; }
+.msg-actions button, .reaction-chip{ background:var(--surface) !important; border:1px solid var(--border) !important; color:var(--text) !important; }
+.reaction-chip.mine{ background:var(--accent-soft) !important; border-color:var(--accent) !important; }
+html[data-theme="dark"] #emoji-picker span:hover, html[data-theme="dark"] .msg-actions button:hover{ background:var(--accent) !important; color:#fff !important; }
+.reply-preview{ background:var(--accent-soft) !important; border-top:1px solid var(--border) !important; border-left:4px solid var(--accent) !important; }
+.reply-preview-text{ color:var(--muted) !important; }
+.message img{ border-radius:12px !important; }
+
+/* ======================================================================
+   DASHBOARD  (friends list → clean rows)
+   ====================================================================== */
+.friend-button{
+  background:var(--surface) !important; color:var(--text) !important;
+  border:1px solid var(--border) !important; border-radius:var(--r) !important;
+  padding:11px 14px !important; box-shadow:none !important;
+  transition:background .15s ease, border-color .15s ease, transform .1s ease;
+}
+.friend-button:hover{ background:var(--surface-2) !important; border-color:var(--accent) !important; transform:none !important; }
+#friend-requests div, #pending-requests div{
+  background:var(--surface) !important; color:var(--text) !important;
+  border:1px solid var(--border) !important; border-radius:var(--r) !important;
+}
+.notif{ background:var(--danger) !important; }
+
+/* ======================================================================
+   ADD FRIENDS
+   ====================================================================== */
+ul#userList{ background:var(--surface) !important; border:1px solid var(--border) !important; border-radius:var(--r) !important; box-shadow:var(--shadow-sm) !important; }
+ul#userList li{ border-bottom:1px solid var(--border) !important; padding:12px 16px !important; }
+ul#userList li:hover{ background:var(--surface-2) !important; }
+html[data-theme="dark"] ul#userList li strong{ color:var(--text) !important; }
+ul#userList li small{ color:var(--muted) !important; }
+
+/* ======================================================================
+   PROFILE  (Instagram-like)
+   ====================================================================== */
+.bigava{
+  box-shadow:0 0 0 4px var(--surface), 0 0 0 7px var(--accent), var(--shadow) !important;
+}
+html[data-theme="dark"] .pinfo h1{ color:var(--text) !important; }
+.pinfo .uname{ color:var(--muted) !important; }
+html[data-theme="dark"] .pinfo .uname{ color:var(--accent) !important; }
+.status{ background:var(--accent-soft) !important; color:var(--accent-strong) !important; font-weight:600 !important; }
+html[data-theme="dark"] .status{ color:#c9ceff !important; }
+.status.empty{ background:var(--surface-2) !important; color:var(--faint) !important; }
+html[data-theme="dark"] .bio{ color:var(--text) !important; }
+.bio.empty{ color:var(--faint) !important; }
+.sect-title{ font-size:.82rem !important; text-transform:uppercase; letter-spacing:.06em; color:var(--muted) !important; border-bottom:1px solid var(--border) !important; }
+html[data-theme="dark"] .edit-row label{ color:var(--text) !important; }
+html[data-theme="dark"] .muted{ color:var(--muted) !important; }
+.post{ border-radius:var(--r) !important; border:1px solid var(--border) !important; box-shadow:var(--shadow-sm) !important; transition:transform .15s ease, box-shadow .15s ease; }
+.post:hover{ transform:translateY(-3px); box-shadow:var(--shadow) !important; }
+html[data-theme="dark"] .post{ background:var(--surface-2) !important; }
+html[data-theme="dark"] .post .cap{ color:var(--text) !important; }
+.post .date{ color:var(--faint) !important; }
+.empty-note{ color:var(--faint) !important; }
+.btn{ border-radius:999px !important; box-shadow:0 6px 16px var(--accent-soft) !important; }
+.btn.ghost{ background:var(--surface-2) !important; color:var(--text) !important; box-shadow:none !important; }
+.btn.teal{ background:var(--accent) !important; }
+.btn.teal:hover{ background:var(--accent-strong) !important; }
+
+/* ======================================================================
+   HOME / LOGIN / SIGNUP
+   ====================================================================== */
+html[data-theme="dark"] .hero-container{ background:rgba(22,24,29,.9) !important; color:var(--text); }
+html[data-theme="dark"] .hero-content h1{ color:#fff !important; }
+html[data-theme="dark"] .hero-content p{ color:var(--muted) !important; }
+.btn.primary{ background:var(--accent) !important; }
+.btn.primary:hover{ background:var(--accent-strong) !important; }
+
+/* ======================================================================
+   DARK-MODE TOGGLE (injected by theme.js)
+   ====================================================================== */
+#cc-theme-toggle{
+  position:fixed; right:20px; bottom:20px;
+  width:48px; height:48px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; line-height:1; padding:0;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); box-shadow:var(--shadow);
+  z-index:9999;
+}
+#cc-theme-toggle:hover{ transform:translateY(-2px) scale(1.06); box-shadow:var(--shadow-lg); }
+
+/* ---------- scrollbars ---------- */
+*{ scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-thumb{ background:var(--border); border-radius:8px; }
+::-webkit-scrollbar-thumb:hover{ background:var(--faint); }
+::-webkit-scrollbar-track{ background:transparent; }
+
+/* ======================================================================
+   AUTH CARDS (login / signup glass popup)
+   ====================================================================== */
+body.auth-page .popup-container,
+body.auth-page .signup-container,
+body.auth-page form.auth,
+body.auth-page .container{
+  background:rgba(255,255,255,.14) !important;
+  backdrop-filter:blur(16px) saturate(1.3) !important;
+  -webkit-backdrop-filter:blur(16px) saturate(1.3) !important;
+  border:1px solid rgba(255,255,255,.25) !important;
+  border-radius:var(--r-lg) !important;
+  box-shadow:0 20px 60px rgba(0,0,0,.35) !important;
+  color:#fff !important;
+}
+body.auth-page h2{ color:#fff !important; }
+body.auth-page input{ background:rgba(255,255,255,.92) !important; color:#111 !important; border:none !important; border-radius:12px !important; }
+body.auth-page input:focus{ box-shadow:0 0 0 4px rgba(255,255,255,.35) !important; }
+body.auth-page button{ background:var(--accent) !important; color:#fff !important; border:none !important; border-radius:12px !important; }
+body.auth-page button:hover{ background:var(--accent-strong) !important; }
+body.auth-page a{ color:#ffd479 !important; }
+
+/* ======================================================================
+   APP SHELL + SIDEBAR  (Instagram-style navigation)
+   ====================================================================== */
+/* when the shell is injected, reset the page body to a plain full-bleed block */
+body:has(.app-shell){ display:block !important; padding:0 !important; margin:0 !important; }
+.app-shell{ display:flex; width:100%; height:100vh; }
+.app-main{
+  flex:1; min-width:0; height:100vh; overflow-y:auto;
+  display:flex; flex-direction:column;
+}
+/* hide the now-redundant in-page button row */
+.app-shell .top-buttons{ display:none !important; }
+
+.cc-sidebar{
+  flex:0 0 250px; width:250px; height:100vh;
+  background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; padding:18px 14px; gap:6px;
+  position:sticky; top:0;
+}
+.cc-logo{
+  display:flex; align-items:center; gap:12px; padding:8px 10px 18px;
+  font-size:1.35rem; font-weight:800; color:var(--text) !important; text-decoration:none !important;
+  letter-spacing:-.03em;
+}
+.cc-logo svg{ color:var(--accent); }
+.cc-nav{ display:flex; flex-direction:column; gap:4px; }
+.cc-nav a{
+  display:flex; align-items:center; gap:15px; padding:12px 12px;
+  border-radius:12px; color:var(--text) !important; text-decoration:none !important;
+  font-size:1rem; font-weight:500; transition:background .15s ease, color .15s ease;
+}
+.cc-nav a svg{ color:var(--muted); flex:0 0 auto; transition:color .15s; }
+.cc-nav a:hover{ background:var(--surface-2); }
+.cc-nav a:hover svg{ color:var(--text); }
+.cc-nav a.active{ background:var(--accent-soft); color:var(--accent-strong) !important; font-weight:700; }
+.cc-nav a.active svg{ color:var(--accent); }
+html[data-theme="dark"] .cc-nav a.active{ color:#fff !important; }
+
+.cc-side-foot{ margin-top:auto; display:flex; flex-direction:column; gap:8px; padding-top:12px; border-top:1px solid var(--border); }
+.cc-me{ display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:12px; text-decoration:none !important; color:var(--text) !important; }
+.cc-me:hover{ background:var(--surface-2); }
+.cc-me .cc-me-name{ font-weight:600; font-size:.95rem; line-height:1.15; min-width:0; }
+.cc-me .cc-me-name small{ display:block; color:var(--muted); font-weight:400; font-size:.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
+.cc-logout{
+  display:flex; align-items:center; gap:12px; padding:11px 12px; width:100%;
+  background:transparent !important; color:var(--muted) !important; border:none !important;
+  border-radius:12px; font-size:.95rem; font-weight:600; cursor:pointer; justify-content:flex-start;
+}
+.cc-logout:hover{ background:rgba(239,68,68,.12) !important; color:var(--danger) !important; }
+.cc-logout svg{ flex:0 0 auto; }
+
+/* on app pages, pull the floating toggle clear of nothing special on desktop */
+@media (max-width:860px){
+  .app-shell{ flex-direction:column; }
+  .cc-sidebar{
+    position:fixed; left:0; right:0; bottom:0; top:auto;
+    width:100%; height:62px; flex-direction:row; align-items:center;
+    padding:0 6px; gap:0; border-right:0; border-top:1px solid var(--border);
+    z-index:9000; justify-content:space-around;
+  }
+  .cc-logo, .cc-me .cc-me-name, .cc-nav a span, .cc-logout span{ display:none; }
+  .cc-nav{ flex-direction:row; gap:0; flex:1; justify-content:space-around; }
+  .cc-nav a{ padding:10px 14px; }
+  .cc-side-foot{ margin-top:0; flex-direction:row; border-top:0; padding-top:0; gap:0; }
+  .cc-me{ padding:8px; }
+  .cc-logout{ width:auto; padding:10px 14px; }
+  .app-main{ height:calc(100vh - 62px); }
+  #cc-theme-toggle{ bottom:76px; }
+}
+
+/* ======================================================================
+   NARROW CARD PAGES (Add Friends, Settings) — center + match app
+   ====================================================================== */
+body.page-narrow .app-main{ align-items:center; padding:44px 20px 70px; }
+body.page-narrow .container{ margin:0 !important; max-width:520px !important; }
+body.page-narrow h2{
+  color:var(--text) !important; font-size:1.6rem !important; font-weight:800 !important;
+  letter-spacing:-.02em !important; margin:0 !important;
+}
+body.page-narrow > .app-shell p{ color:var(--muted) !important; }
+body.page-narrow #searchBar{ background:var(--surface-2) !important; }
+body.page-narrow ul#userList{ background:var(--surface) !important; box-shadow:none !important; border:1px solid var(--border) !important; }
+body.page-narrow ul#userList li{ padding:12px 16px !important; }
+body.page-narrow ul#userList li strong{ color:var(--text) !important; font-weight:650 !important; }
+body.page-narrow ul#userList li small{ color:var(--muted) !important; font-style:normal !important; margin-left:0 !important; }
+body.page-narrow ul#userList button:not(:disabled){
+  background:var(--accent) !important; box-shadow:0 6px 14px var(--accent-soft) !important; border-radius:999px !important;
+}
+body.page-narrow ul#userList button:not(:disabled):hover{ background:var(--accent-strong) !important; }
+html[data-theme="dark"] body.page-narrow ul#userList button:disabled{ background:var(--surface-2) !important; color:var(--faint) !important; }
+body.page-narrow .back-link{ color:var(--accent) !important; }
+/* settings buttons → consistent pills */
+body.page-narrow .container > button{ max-width:320px; align-self:center; }

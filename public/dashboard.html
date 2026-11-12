@@ -80,27 +80,65 @@
       background-color: #a71d2a;
     }
   </style>
+  <link rel="stylesheet" href="theme.css" />
+  <script src="theme.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h2>Welcome, <span id="username-display"></span>! 😊</h2>
+  <div class="container dash">
+    <header class="home-head">
+      <div>
+        <h1 class="home-title">Messages</h1>
+        <p class="home-greet">Welcome back, <strong id="username-display"></strong> 👋</p>
+      </div>
+      <button class="home-add-btn" onclick="goToAddFriends()">
+        <i class="fa-solid fa-user-plus"></i> Add Friends
+      </button>
+    </header>
 
-    <div class="top-buttons">
-      <button onclick="goToAddFriends()" class="add"><i class="fa-solid fa-user-plus"></i> Add Friends</button>
-      <button onclick="goToSettings()" class="settings"><i class="fa-solid fa-gear"></i> Settings</button>
-      <button onclick="logout()" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    <div class="home-grid">
+      <section class="panel home-chats">
+        <div class="panel-head">
+          <h3>Chats</h3>
+          <button class="new-group-btn" onclick="openGroupModal()"><i class="fa-solid fa-user-group"></i> New Group</button>
+        </div>
+        <div class="chats-search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="friend-search" placeholder="Search chats…" autocomplete="off" />
+        </div>
+        <div id="group-list" class="friend-list"></div>
+        <div id="friend-list" class="friend-list"></div>
+        <div id="friend-empty-search" class="friend-empty-search" style="display:none">No chats match that search.</div>
+      </section>
+
+      <aside class="home-side">
+        <section class="panel">
+          <div class="panel-head"><h3>Friend Requests</h3></div>
+          <div id="friend-requests"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h3>Pending</h3></div>
+          <div id="pending-requests"></div>
+        </section>
+      </aside>
     </div>
+  </div>
 
-    <!-- Moved friend request stuff above friends -->
-
-    <h3>Friend Requests</h3>
-    <div id="friend-requests"></div>
-
-    <h3>Pending Friend Requests</h3>
-    <div id="pending-requests"></div>
-
-    <h3>Your Friends</h3>
-    <div id="friend-list"></div>
+  <!-- Create-group modal -->
+  <div id="group-modal" class="cc-modal hidden">
+    <div class="cc-modal-card">
+      <div class="cc-modal-head">
+        <h3>New Group</h3>
+        <button class="cc-modal-x" onclick="closeGroupModal()">✕</button>
+      </div>
+      <input type="text" id="group-name" maxlength="40" placeholder="Group name (e.g. Study Squad)" />
+      <div class="cc-modal-label">Add friends</div>
+      <input type="text" id="group-friend-search" class="group-friend-search" placeholder="Search friends…" autocomplete="off" oninput="filterGroupFriends()" />
+      <div id="group-friends" class="group-friends"></div>
+      <div class="cc-modal-actions">
+        <button class="cc-btn-ghost" onclick="closeGroupModal()">Cancel</button>
+        <button class="cc-btn-primary" onclick="createGroup()">Create group</button>
+      </div>
+    </div>
   </div>
 
   <!-- Firebase -->
@@ -108,6 +146,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="profile-utils.js"></script>
   <script src="push.js"></script>
 
   <script>
@@ -179,19 +218,64 @@
 
               const btn = document.createElement("button");
               btn.className = "friend-button";
-              btn.innerHTML = `
-                <span>${friendName}</span>
-                <span class="notif" id="notif-${friendUsername}">0</span>
-              `;
+
+              const left = document.createElement("span");
+              left.className = "fb-left";
+              left.appendChild(makeAvatar(friendUsername, friendName, 46));
+
+              const meta = document.createElement("span");
+              meta.className = "fb-meta";
+              const nameSpan = document.createElement("span");
+              nameSpan.className = "fb-name";
+              nameSpan.textContent = friendName;
+              const subSpan = document.createElement("span");
+              subSpan.className = "fb-sub";
+              subSpan.textContent = "@" + friendUsername;
+              meta.appendChild(nameSpan);
+              meta.appendChild(subSpan);
+              left.appendChild(meta);
+
+              const right = document.createElement("span");
+              right.className = "fb-right";
+              const notif = document.createElement("span");
+              notif.className = "notif";
+              notif.id = `notif-${friendUsername}`;
+              notif.textContent = "0";
+              const chev = document.createElement("span");
+              chev.className = "fb-chevron";
+              chev.innerHTML = "&rsaquo;";
+              right.appendChild(notif);
+              right.appendChild(chev);
+
+              btn.appendChild(left);
+              btn.appendChild(right);
+              btn.setAttribute("data-search", (friendName + " @" + friendUsername).toLowerCase());
               btn.onclick = () => openChatWith(friendUsername);
 
               friendList.appendChild(btn);
+              applyFriendFilter();
 
               watchUnreadMessages(friendUsername);
             });
           });
         });
     }
+
+    // Client-side filter for the Chats search box.
+    const friendSearch = document.getElementById("friend-search");
+    function applyFriendFilter() {
+      const q = (friendSearch.value || "").toLowerCase().trim();
+      const rows = document.querySelectorAll(".home-chats .friend-button");
+      let shown = 0;
+      rows.forEach(b => {
+        const match = (b.getAttribute("data-search") || "").includes(q);
+        b.style.display = match ? "" : "none";
+        if (match) shown++;
+      });
+      const emptyEl = document.getElementById("friend-empty-search");
+      if (emptyEl) emptyEl.style.display = (q && shown === 0 && rows.length) ? "block" : "none";
+    }
+    friendSearch.addEventListener("input", applyFriendFilter);
 
     function loadFriendRequests() {
       friendRequestsDiv.innerHTML = "";
@@ -303,8 +387,132 @@
         .doc(chatId + "_" + currentUser)
         .set({ lastRead: Date.now() });
 
+      // Clear any group selection so chat.html opens the 1:1 chat.
+      localStorage.removeItem("chatId");
+      localStorage.removeItem("chatIsGroup");
+      localStorage.removeItem("chatName");
       localStorage.setItem("chatWith", friendUsername);
       window.location.href = "chat.html";
+    }
+
+    /* =====================================================================
+       GROUP CHATS
+    ===================================================================== */
+    function openGroupChat(groupId, name) {
+      db.collection("lastRead").doc(groupId + "_" + currentUser).set({ lastRead: Date.now() }).catch(() => {});
+      localStorage.setItem("chatId", groupId);
+      localStorage.setItem("chatName", name || "Group");
+      localStorage.setItem("chatIsGroup", "1");
+      localStorage.removeItem("chatWith");
+      window.location.href = "chat.html";
+    }
+
+    function loadGroups() {
+      const groupListEl = document.getElementById("group-list");
+      db.collection("chats")
+        .where("participants", "array-contains", currentUser)
+        .onSnapshot(snapshot => {
+          const groups = [];
+          snapshot.forEach(doc => {
+            const d = doc.data();
+            if (d && d.isGroup) groups.push({ id: doc.id, name: d.name || "Group", members: (d.participants || []).length, createdAt: d.createdAt || 0 });
+          });
+          groups.sort((a, b) => b.createdAt - a.createdAt);
+
+          groupListEl.innerHTML = "";
+          groups.forEach(g => {
+            const btn = document.createElement("button");
+            btn.className = "friend-button";
+            btn.setAttribute("data-search", (g.name || "group").toLowerCase());
+
+            const left = document.createElement("span");
+            left.className = "fb-left";
+            const ava = document.createElement("span");
+            ava.className = "cc-avatar group-ava";
+            ava.textContent = "👥";
+            const meta = document.createElement("span");
+            meta.className = "fb-meta";
+            meta.innerHTML = `<span class="fb-name">${g.name.replace(/[<>&]/g, "")}</span><span class="fb-sub">${g.members} members</span>`;
+            left.appendChild(ava);
+            left.appendChild(meta);
+
+            const right = document.createElement("span");
+            right.className = "fb-right";
+            right.innerHTML = '<span class="fb-chevron">&rsaquo;</span>';
+
+            btn.appendChild(left);
+            btn.appendChild(right);
+            btn.onclick = () => openGroupChat(g.id, g.name);
+            groupListEl.appendChild(btn);
+          });
+          applyFriendFilter();
+        }, err => console.error("loadGroups:", err));
+    }
+
+    function openGroupModal() {
+      const picks = document.getElementById("group-friends");
+      picks.innerHTML = "<p class='gf-empty'>Loading friends…</p>";
+      document.getElementById("group-name").value = "";
+      document.getElementById("group-friend-search").value = "";
+      document.getElementById("group-modal").classList.remove("hidden");
+
+      db.collection("friends")
+        .where("user", "==", currentUser)
+        .where("accepted", "==", true)
+        .get()
+        .then(snap => {
+          picks.innerHTML = "";
+          if (snap.empty) { picks.innerHTML = "<p class='gf-empty'>Add some friends first to start a group.</p>"; return; }
+          snap.forEach(doc => {
+            const fu = doc.data().friend;
+            const row = document.createElement("label");
+            row.className = "gf-row";
+            row.setAttribute("data-name", fu.toLowerCase());
+            row.innerHTML = `<input type="checkbox" value="${fu.replace(/"/g, "")}" /><span>${fu.replace(/[<>&]/g, "")}</span>`;
+            picks.appendChild(row);
+          });
+        })
+        .catch(() => { picks.innerHTML = "<p class='gf-empty'>Couldn't load friends.</p>"; });
+    }
+    function closeGroupModal() { document.getElementById("group-modal").classList.add("hidden"); }
+
+    function filterGroupFriends() {
+      const q = (document.getElementById("group-friend-search").value || "").toLowerCase().trim();
+      const rows = document.querySelectorAll("#group-friends .gf-row");
+      let shown = 0;
+      rows.forEach(r => {
+        const match = (r.getAttribute("data-name") || "").includes(q);
+        r.style.display = match ? "" : "none";
+        if (match) shown++;
+      });
+      let note = document.getElementById("gf-no-match");
+      if (!note) {
+        note = document.createElement("p");
+        note.id = "gf-no-match"; note.className = "gf-empty";
+        note.textContent = "No friends match that search.";
+        document.getElementById("group-friends").appendChild(note);
+      }
+      note.style.display = (q && shown === 0 && rows.length) ? "block" : "none";
+    }
+
+    function createGroup() {
+      const name = document.getElementById("group-name").value.trim();
+      const checked = Array.from(document.querySelectorAll("#group-friends input:checked")).map(c => c.value);
+      if (!name) { alert("Give your group a name."); return; }
+      if (checked.length < 2) { alert("Pick at least 2 friends to make a group."); return; }
+
+      const participants = [currentUser, ...checked];
+      const groupId = "group_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+      db.collection("chats").doc(groupId).set({
+        participants: participants,
+        name: name,
+        isGroup: true,
+        createdBy: currentUser,
+        createdAt: Date.now()
+      }).then(() => {
+        closeGroupModal();
+        openGroupChat(groupId, name);
+      }).catch(e => alert("Could not create group. " + (e.message || "")));
     }
 
     function watchUnreadMessages(friendUsername) {
@@ -360,6 +568,10 @@
       window.location.href = "settings.html";
     }
 
+    function goToMyProfile() {
+      window.location.href = "profile.html?user=" + encodeURIComponent(currentUser);
+    }
+
     function logout() {
       localStorage.removeItem("username");
       localStorage.removeItem("chatWith");
@@ -370,6 +582,8 @@
     loadFriendRequests();
     loadPendingFriendRequests();
     loadFriends();
+    loadGroups();
   </script>
+  <script src="sidebar.js"></script>
 </body>
 </html>

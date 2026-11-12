@@ -171,8 +171,10 @@
       border-radius: 8px;
     }
   </style>
+  <link rel="stylesheet" href="theme.css" />
+  <script src="theme.js"></script>
 </head>
-<body>
+<body class="page-narrow">
   <div class="container">
     <h2>Add Friends</h2>
     <p>
@@ -189,6 +191,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="profile-utils.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCx00DmHMLmiDbfFUiBN3w5ueIxAzLqWus",
@@ -201,6 +204,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    window.db = db; // expose for profile-utils.js helpers
 
     const currentUsername = localStorage.getItem('username');
     const userList = document.getElementById("userList");
@@ -250,10 +254,18 @@
 
       filtered.forEach(user => {
         const li = document.createElement("li");
-        li.innerHTML = `<div>
-                          <strong>${user.name || user.username}</strong><br/>
-                          <small>@${user.username}</small>
-                        </div>`;
+        const info = document.createElement("div");
+        info.style.display = "flex";
+        info.style.alignItems = "center";
+        info.style.gap = "10px";
+        info.style.cursor = "pointer";
+        info.appendChild(makeAvatar(user.username, user.name, 40));
+        const txt = document.createElement("div");
+        txt.innerHTML = `<strong>${user.name || user.username}</strong><br/><small>@${user.username}</small>`;
+        info.appendChild(txt);
+        info.title = "View profile";
+        info.onclick = () => goToProfile(user.username);
+        li.appendChild(info);
 
         const addBtn = document.createElement("button");
         if (currentFriends.includes(user.username)) {
@@ -314,5 +326,6 @@
     searchBar.addEventListener("input", renderUserList);
     fetchUsers();
   </script>
+  <script src="sidebar.js"></script>
 </body>
 </html>

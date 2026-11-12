@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChitChat - Profile</title>
+  <link rel="icon" href="/favicon.png" type="image/x-icon" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#007aff" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <style>
+    *{box-sizing:border-box; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+    html,body{margin:0;padding:0;min-height:100%}
+    body{
+      background:linear-gradient(135deg,#e0f7fa,#ffffff);
+      color:#1a1a1a; min-height:100vh;
+    }
+    .wrap{max-width:720px; margin:0 auto; padding:18px 16px 60px}
+    .topnav{display:flex; align-items:center; gap:10px; margin-bottom:16px}
+    .topnav a{color:#00796b; font-weight:600; text-decoration:none}
+    .topnav a:hover{text-decoration:underline}
+    .spacer{flex:1}
+
+    .card{
+      background:#fff; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,.1);
+      padding:26px; margin-bottom:22px;
+    }
+    .phead{display:flex; gap:20px; align-items:center}
+    .bigava{
+      width:104px; height:104px; border-radius:50%; flex:0 0 104px;
+      background:#2196f3; color:#fff; font-weight:800; font-size:44px;
+      display:flex; align-items:center; justify-content:center;
+      background-size:cover; background-position:center; overflow:hidden;
+      box-shadow:0 6px 16px rgba(0,0,0,.18); position:relative;
+    }
+    .bigava .editbadge{
+      position:absolute; bottom:0; right:0; width:34px; height:34px; border-radius:50%;
+      background:#00796b; color:#fff; display:flex; align-items:center; justify-content:center;
+      font-size:16px; cursor:pointer; border:3px solid #fff;
+    }
+    .pinfo{min-width:0; flex:1}
+    .pinfo h1{margin:0; font-size:1.8rem; color:#004d40; word-break:break-word}
+    .pinfo .uname{color:#00796b; font-size:1rem; margin:2px 0 8px}
+    .status{
+      display:inline-block; background:#e0f2f1; color:#00695c; border-radius:20px;
+      padding:5px 14px; font-size:.95rem; font-weight:600;
+    }
+    .status.empty{background:#f1f1f1; color:#999; font-weight:500; font-style:italic}
+    .bio{margin-top:14px; white-space:pre-wrap; word-wrap:break-word; color:#333; line-height:1.5}
+    .bio.empty{color:#aaa; font-style:italic}
+
+    .actions{display:flex; gap:12px; margin-top:18px; flex-wrap:wrap}
+    .btn{
+      border:none; border-radius:24px; padding:11px 20px; font-size:15px; font-weight:600;
+      cursor:pointer; color:#fff; background:linear-gradient(135deg,#2196f3,#1976d2);
+      transition:all .2s ease; display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn:hover{transform:translateY(-1px); box-shadow:0 4px 10px rgba(25,118,210,.3)}
+    .btn.teal{background:linear-gradient(135deg,#26a69a,#00796b)}
+    .btn.ghost{background:#eef4f7; color:#00695c}
+    .btn.danger{background:linear-gradient(135deg,#ef5350,#c62828)}
+    .btn.small{padding:7px 14px; font-size:13px}
+
+    .sect-title{
+      margin:8px 2px 14px; color:#00796b; font-size:1.3rem; font-weight:700;
+      border-bottom:3px solid #b2dfdb; padding-bottom:8px;
+    }
+
+    .edit-row{margin:14px 0}
+    .edit-row label{display:block; font-weight:600; color:#00695c; margin-bottom:6px; font-size:.95rem}
+    textarea,input[type=text]{
+      width:100%; border:1px solid #90caf9; border-radius:14px; padding:12px 15px;
+      font-size:15px; background:#f9fcff; resize:vertical; font-family:inherit;
+    }
+    textarea:focus,input:focus{outline:none; border-color:#2196f3; background:#fff; box-shadow:0 0 0 3px rgba(33,150,243,.18)}
+    .muted{color:#888; font-size:.85rem; margin-top:4px}
+
+    /* posts */
+    .postbox{display:flex; gap:12px; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap}
+    #postPreview{max-width:120px; max-height:120px; border-radius:12px; display:none; object-fit:cover}
+    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px}
+    .post{
+      background:#fff; border:1px solid #e0f0ef; border-radius:14px; overflow:hidden;
+      box-shadow:0 3px 10px rgba(0,0,0,.07); display:flex; flex-direction:column;
+    }
+    .post img{width:100%; aspect-ratio:1/1; object-fit:cover; cursor:zoom-in; display:block}
+    .post .cap{padding:8px 10px; font-size:.9rem; color:#333; word-wrap:break-word; flex:1}
+    .post .pfoot{display:flex; align-items:center; justify-content:space-between; padding:0 10px 10px}
+    .post .date{font-size:.75rem; color:#999}
+    .post .del{background:none; border:none; color:#c62828; cursor:pointer; font-size:.85rem; padding:2px 4px}
+    .empty-note{color:#999; text-align:center; padding:26px; font-style:italic}
+
+    #lb{position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:50; cursor:zoom-out}
+    #lb img{max-width:92vw; max-height:92vh; border-radius:8px}
+    .hidden{display:none !important}
+    @media(max-width:520px){
+      .phead{flex-direction:column; text-align:center; align-items:center}
+      .bigava{flex-basis:96px}
+      .card{padding:20px}
+    }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+  <script src="theme.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topnav">
+      <a href="dashboard.html">← Dashboard</a>
+      <div class="spacer"></div>
+      <a href="#" id="myProfileLink">My Profile</a>
+    </div>
+
+    <!-- Profile header -->
+    <div class="card">
+      <div class="phead">
+        <div class="bigava" id="bigAva">?</div>
+        <div class="pinfo">
+          <h1 id="pName">Loading…</h1>
+          <div class="uname" id="pUser">@…</div>
+          <span class="status empty" id="pStatus">No status</span>
+          <div class="bio empty" id="pBio"></div>
+        </div>
+      </div>
+
+      <div class="actions" id="viewActions"></div>
+
+      <!-- Owner editing panel -->
+      <div id="editPanel" class="hidden">
+        <div class="edit-row">
+          <label for="statusInput">What are you up to? (status)</label>
+          <input type="text" id="statusInput" maxlength="80" placeholder="e.g. Grinding homework 📚" />
+        </div>
+        <div class="edit-row">
+          <label for="bioInput">Bio</label>
+          <textarea id="bioInput" rows="4" maxlength="500" placeholder="Tell people about yourself…"></textarea>
+          <div class="muted"><span id="bioCount">0</span>/500</div>
+        </div>
+        <div class="actions">
+          <button class="btn teal" id="saveProfileBtn">💾 Save profile</button>
+          <button class="btn ghost" id="cancelEditBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- New post (owner only) -->
+    <div class="card hidden" id="newPostCard">
+      <div class="sect-title">Share a picture</div>
+      <div class="postbox">
+        <button class="btn" id="choosePicBtn">🖼️ Choose picture</button>
+        <img id="postPreview" alt="preview" />
+      </div>
+      <div class="edit-row">
+        <input type="text" id="postCaption" maxlength="200" placeholder="Add a caption (optional)…" />
+      </div>
+      <div class="actions">
+        <button class="btn teal hidden" id="publishPostBtn">📤 Post to my profile</button>
+      </div>
+      <input type="file" id="postFile" accept="image/*" class="hidden" />
+    </div>
+
+    <!-- Posts gallery -->
+    <div class="card">
+      <div class="sect-title" id="galleryTitle">Pictures</div>
+      <div class="grid" id="postGrid"></div>
+      <div class="empty-note hidden" id="noPosts"></div>
+    </div>
+  </div>
+
+  <div id="lb"><img id="lbImg" alt="" /></div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="profile-utils.js"></script>
+  <script>
+    const currentUser = localStorage.getItem("username");
+    if (!currentUser) { alert("Not logged in."); location.href = "index.html"; }
+
+    const params = new URLSearchParams(location.search);
+    const profileUser = params.get("user") || currentUser;
+    const isOwner = profileUser === currentUser;
+
+    const $ = id => document.getElementById(id);
+    $("myProfileLink").href = "profile.html?user=" + encodeURIComponent(currentUser);
+
+    let pendingPhoto = null;   // data URL awaiting save
+    let pendingPost = null;    // data URL awaiting publish
+    let userData = {};
+
+    function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
+    function setAvatar(url, letter){
+      const a = $("bigAva");
+      // keep any edit badge that owners get
+      const badge = a.querySelector(".editbadge");
+      if (url){ a.style.backgroundImage = `url("${url}")`; a.firstChild && (a.textContent=""); }
+      else { a.style.backgroundImage=""; a.textContent = (letter||"?").toUpperCase(); }
+      if (badge) a.appendChild(badge);
+    }
+
+    async function loadProfile(){
+      let doc;
+      try { doc = await db.collection("users").doc(profileUser).get(); }
+      catch(e){ $("pName").textContent = "Could not load profile."; return; }
+
+      if (!doc.exists){ $("pName").textContent = "User not found"; $("pUser").textContent = "@" + profileUser; return; }
+      userData = doc.data();
+
+      const name = userData.name || profileUser;
+      $("pName").textContent = name;
+      $("pUser").textContent = "@" + profileUser;
+      document.title = "ChitChat - " + name;
+
+      setAvatar(userData.photo, name.charAt(0));
+
+      const status = (userData.status || "").trim();
+      const st = $("pStatus");
+      if (status){ st.textContent = status; st.classList.remove("empty"); }
+      else { st.textContent = isOwner ? "Set your status →" : "No status yet"; st.classList.add("empty"); }
+
+      const bio = (userData.bio || "").trim();
+      const bioEl = $("pBio");
+      if (bio){ bioEl.textContent = bio; bioEl.classList.remove("empty"); }
+      else { bioEl.textContent = isOwner ? "Add a bio to tell people about yourself." : "No bio yet."; bioEl.classList.add("empty"); }
+
+      buildActions();
+    }
+
+    function buildActions(){
+      const box = $("viewActions"); box.innerHTML = "";
+      if (isOwner){
+        // edit badge on avatar
+        if (!$("bigAva").querySelector(".editbadge")){
+          const badge = document.createElement("div");
+          badge.className = "editbadge"; badge.title = "Change photo"; badge.textContent = "📷";
+          badge.onclick = () => $("photoFile").click();
+          $("bigAva").appendChild(badge);
+        }
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn"; editBtn.innerHTML = "✏️ Edit profile";
+        editBtn.onclick = openEdit;
+        box.appendChild(editBtn);
+
+        $("newPostCard").classList.remove("hidden");
+        $("galleryTitle").textContent = "My pictures";
+      } else {
+        const msgBtn = document.createElement("button");
+        msgBtn.className = "btn teal"; msgBtn.innerHTML = "💬 Message";
+        msgBtn.onclick = messageUser;
+        box.appendChild(msgBtn);
+        $("galleryTitle").textContent = (userData.name || profileUser) + "'s pictures";
+      }
+    }
+
+    function messageUser(){
+      const chatId = [currentUser, profileUser].sort().join("_");
+      db.collection("lastRead").doc(chatId + "_" + currentUser).set({ lastRead: Date.now() }).catch(()=>{});
+      localStorage.removeItem("chatId");
+      localStorage.removeItem("chatIsGroup");
+      localStorage.removeItem("chatName");
+      localStorage.setItem("chatWith", profileUser);
+      location.href = "chat.html";
+    }
+
+    /* ---------- owner: edit profile ---------- */
+    function openEdit(){
+      $("statusInput").value = userData.status || "";
+      $("bioInput").value = userData.bio || "";
+      $("bioCount").textContent = (userData.bio || "").length;
+      $("editPanel").classList.remove("hidden");
+      $("statusInput").focus();
+    }
+    function closeEdit(){ $("editPanel").classList.add("hidden"); pendingPhoto = null; }
+
+    if (isOwner){
+      // hidden photo file input
+      const pf = document.createElement("input");
+      pf.type = "file"; pf.accept = "image/*"; pf.id = "photoFile"; pf.className = "hidden";
+      document.body.appendChild(pf);
+      pf.addEventListener("change", async e => {
+        const file = e.target.files[0]; pf.value = "";
+        if (!file || !file.type.startsWith("image/")) return;
+        try {
+          const url = await compressImage(file, 320, 0.8); // small square-ish avatar
+          pendingPhoto = url;
+          setAvatar(url, (userData.name||profileUser).charAt(0));
+          // save immediately
+          await db.collection("users").doc(currentUser).set({ photo: url }, { merge: true });
+          userData.photo = url;
+        } catch(err){ alert(err.message || "Could not set photo."); }
+      });
+
+      $("bioInput").addEventListener("input", e => $("bioCount").textContent = e.target.value.length);
+      $("cancelEditBtn").onclick = closeEdit;
+      $("saveProfileBtn").onclick = async () => {
+        const status = $("statusInput").value.trim();
+        const bio = $("bioInput").value.trim();
+        try {
+          await db.collection("users").doc(currentUser).set({ status, bio }, { merge: true });
+          userData.status = status; userData.bio = bio;
+          closeEdit(); loadProfile();
+        } catch(err){ alert("Could not save. " + (err.message||"")); }
+      };
+
+      /* ---------- owner: new post ---------- */
+      $("choosePicBtn").onclick = () => $("postFile").click();
+      $("postFile").addEventListener("change", async e => {
+        const file = e.target.files[0]; $("postFile").value = "";
+        if (!file || !file.type.startsWith("image/")) return;
+        try {
+          const url = await compressImage(file, 1080, 0.72);
+          pendingPost = url;
+          const prev = $("postPreview");
+          prev.src = url; prev.style.display = "block";
+          $("publishPostBtn").classList.remove("hidden");
+        } catch(err){ alert(err.message || "Could not load image."); }
+      });
+      $("publishPostBtn").onclick = async () => {
+        if (!pendingPost) return;
+        const btn = $("publishPostBtn"); btn.disabled = true; btn.textContent = "Posting…";
+        try {
+          await db.collection("users").doc(currentUser).collection("posts").add({
+            image: pendingPost,
+            caption: $("postCaption").value.trim(),
+            timestamp: Date.now()
+          });
+          pendingPost = null;
+          $("postPreview").style.display = "none"; $("postPreview").src = "";
+          $("postCaption").value = "";
+          btn.classList.add("hidden");
+          loadPosts();
+        } catch(err){ alert("Could not post. " + (err.message||"")); }
+        finally { btn.disabled = false; btn.textContent = "📤 Post to my profile"; }
+      };
+    }
+
+    /* ---------- posts gallery ---------- */
+    async function loadPosts(){
+      const grid = $("postGrid"); grid.innerHTML = "";
+      let snap;
+      try {
+        snap = await db.collection("users").doc(profileUser).collection("posts")
+          .orderBy("timestamp", "desc").get();
+      } catch(e){ $("noPosts").textContent = "Could not load pictures."; $("noPosts").classList.remove("hidden"); return; }
+
+      if (snap.empty){
+        $("noPosts").textContent = isOwner ? "You haven't posted any pictures yet." : "No pictures yet.";
+        $("noPosts").classList.remove("hidden");
+        return;
+      }
+      $("noPosts").classList.add("hidden");
+
+      snap.forEach(docSnap => {
+        const p = docSnap.data();
+        const card = document.createElement("div");
+        card.className = "post";
+        const when = p.timestamp ? new Date(p.timestamp).toLocaleDateString([], {month:"short", day:"numeric", year:"numeric"}) : "";
+        card.innerHTML = `
+          <img src="${esc(p.image)}" alt="post" />
+          ${p.caption ? `<div class="cap">${esc(p.caption)}</div>` : `<div class="cap"></div>`}
+          <div class="pfoot">
+            <span class="date">${esc(when)}</span>
+            ${isOwner ? `<button class="del">Delete</button>` : ``}
+          </div>`;
+        card.querySelector("img").onclick = () => { $("lbImg").src = p.image; $("lb").style.display = "flex"; };
+        if (isOwner){
+          card.querySelector(".del").onclick = async () => {
+            if (!confirm("Delete this picture?")) return;
+            try { await db.collection("users").doc(currentUser).collection("posts").doc(docSnap.id).delete(); loadPosts(); }
+            catch(err){ alert("Could not delete."); }
+          };
+        }
+        grid.appendChild(card);
+      });
+    }
+
+    $("lb").onclick = () => { $("lb").style.display = "none"; $("lbImg").src = ""; };
+
+    loadProfile();
+    loadPosts();
+  </script>
+  <script src="sidebar.js"></script>
+</body>
+</html>
